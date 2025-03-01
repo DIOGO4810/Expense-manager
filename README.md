@@ -31,10 +31,11 @@ Expense Manager é uma aplicação desktop desenvolvida em Python com Tkinter e 
 ## Como Usar
 
 1. Ao iniciar a aplicação, insira o seu orçamento mensal no primeiro campo de texto e pressione **Enter**.
-2. Insira um valor para uma despesa específica e pressione **Enter**.
-3. Nomeie a despesa e pressione **Enter**.
-4. As despesas serão automaticamente refletidas no gráfico de pizza.
-5. Pode adicionar novas despesas repetindo os passos anteriores.
+2. Insira um valor para uma despesa específica.
+3. Nomeie a despesa .
+4. Clicke no botão de submissão
+5. As despesas serão automaticamente refletidas no gráfico de pizza.
+6. Pode adicionar novas despesas repetindo os passos anteriores.
 
 
 
