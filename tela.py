@@ -1,4 +1,3 @@
-import tkinter as tk
 import platform
 import ctypes
 
