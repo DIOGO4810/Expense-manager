@@ -1,7 +1,7 @@
 import tkinter as tk
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from pieChart import exibirGrafico, atualizarGraph, criarMensal,setScreen
+from tela import mostrarCaixaDeTexto,salvarGrafico
+
 
 labels = ['Poupança']
 sizes = [200]
@@ -22,6 +22,8 @@ def submeterMensal(event, text_widget, canvas, ax):
         label2.pack(pady=10)
         textDespesaBox.pack(pady=10)
         submeterButton.pack(pady=10)
+        botaoSalvar = tk.Button(root, text="Salvar Gráfico", command=lambda:mostrarCaixaDeTexto(fig,root))
+        botaoSalvar.pack(pady=10)
         textBox.pack_forget()
         label.pack_forget()
 
@@ -31,13 +33,12 @@ def processarDespesa ():
     atualizarGraph(sizes,colors,labels,canvas,ax,value,nome)
     numberBox.delete(0, tk.END)
     textDespesaBox.delete(0, tk.END)
-
-
+    
 
 root = tk.Tk()
 
 screenHeight,screenWidth = setScreen(root)
-canvas, ax = exibirGrafico(sizes,colors,labels,root)
+canvas,ax,fig = exibirGrafico(sizes,colors,labels,root)
 
 label = tk.Label(root, text="Exiba o seu orçamento mensal liquido", font=("Arial", 14), fg="white", bg="#282828")
 label.pack(pady=10)
@@ -51,6 +52,8 @@ numberBox = tk.Entry(root, width=30, bg="white", fg="black")
 
 label2 = tk.Label(root, text="Exiba o nome da sua primeira despesa", font=("Arial", 14), fg="white", bg="#282828")
 textDespesaBox = tk.Entry(root, width=30, bg="white", fg="black")
+
+
 
 
 

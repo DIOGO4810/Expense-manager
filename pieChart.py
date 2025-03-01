@@ -5,6 +5,9 @@ from tela import is_dark_mode
 
 
 
+
+
+
 def setScreen (root):
     root.title("Expense Manager")
 
@@ -29,11 +32,11 @@ def exibirGrafico(sizes,colors,labels,root):
     ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', textprops=font_properties, labeldistance=1.2)
     ax.axis('equal')  
 
-    # Inserir o gráfico na interface Tkinter
-    canvas = FigureCanvasTkAgg(fig, master=root)  # Conectar o gráfico à janela Tkinter
+   
+    canvas = FigureCanvasTkAgg(fig, master=root) 
     canvas.draw()
     canvas.get_tk_widget().pack()  # Exibir o gráfico
-    return canvas, ax
+    return canvas, ax,fig
 
 
 
@@ -67,3 +70,6 @@ def atualizarGraph(sizes,colors,labels,canvas, ax, size,nome):
     canvas.draw()  
     print(labels)
     print(sizes)
+
+
+
