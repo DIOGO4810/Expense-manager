@@ -9,13 +9,13 @@ sizes = [200]
 colors = ['#99ff99']
 
 
-def salvarDados(fig,root):
+def salvarDados(fig,root,grafSystem):
     dados = {
         "labels": labels,
         "sizes": sizes,
         "colors": colors
     }
-    mostrarCaixaDeTexto(fig,root,dados)
+    mostrarCaixaDeTexto(fig,root,dados,grafSystem)
 
 
 

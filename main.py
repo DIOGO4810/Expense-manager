@@ -1,12 +1,12 @@
 import tkinter as tk
 from pieChart import exibirGrafico, atualizarGraph, criarMensal,setScreen,getPercentage,setLegenda,getLabel,getSize,salvarDados
-
+from tela import carregar_imagens_da_pasta
 
 flag = False
 i = 0
 numDespesas = 0
 
-def submeterMensal(event,text_widget, canvas, ax,mensalValues):
+def submeterMensal(event,text_widget, canvas, ax,mensalValues,grafSystem):
     global flag  # Para modificar a variável global
     texto = text_widget.get("1.0", tk.END).strip()
 
@@ -26,7 +26,7 @@ def submeterMensal(event,text_widget, canvas, ax,mensalValues):
         label2.pack(pady=10)
         textDespesaBox.pack(pady=10)
         submeterButton.pack(pady=10)
-        botaoSalvar = tk.Button(root, text="Salvar Gráfico", command=lambda:salvarDados(fig,root))
+        botaoSalvar = tk.Button(root, text="Salvar Gráfico", command=lambda:salvarDados(fig,root,grafSystem))
         botaoSalvar.pack(pady=10)
         textBox.pack_forget()
         label.pack_forget()
@@ -68,6 +68,28 @@ screenHeight,screenWidth = setScreen(root)
 legendas = tk.Frame(root,width=400,bg="#202020")
 legendas.pack(side="right", fill="y")
 
+# Criar o Canvas dentro do Frame principal
+canvas = tk.Canvas(root, bg="#202020",width=230)
+canvas.pack(side="left",fill="y")
+
+# Adicionar a barra de rolagem no Canvas
+scrollbar = tk.Scrollbar(root, orient="vertical", command=canvas.yview)
+scrollbar.pack(side="left", fill="y")
+
+# Configurar o Canvas para trabalhar com a barra de rolagem
+canvas.config(yscrollcommand=scrollbar.set)
+
+# Criar o Frame grafSystem dentro do Canvas
+grafSystem = tk.Frame(canvas, bg="#202020")
+canvas.create_window(0, 0, window=grafSystem, anchor="nw")
+
+# Carregar as imagens da pasta SavedGraphs e exibir no grafSystem
+carregar_imagens_da_pasta("SavedGraphs", grafSystem)
+
+# Atualizar a área rolável e configurar a rolagem corretamente
+grafSystem.update_idletasks()  # Atualiza o layout do grafSystem
+canvas.config(scrollregion=canvas.bbox("all"))  # Atualiza o tamanho da área rolável
+
 
 canvas,ax,fig = exibirGrafico(root)
 
@@ -80,7 +102,7 @@ textBox = tk.Text(root, height=1, width=30, bg="white", fg="black")
 textBox.pack(pady=10)
 mensalValues = tk.StringVar()
 
-textBox.bind("<Return>", lambda event: submeterMensal(event, textBox, canvas, ax,mensalValues))
+textBox.bind("<Return>", lambda event: submeterMensal(event, textBox, canvas, ax,mensalValues,grafSystem))
 
 
 # Zona das Despesas
