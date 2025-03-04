@@ -1,6 +1,8 @@
 import platform
 import ctypes
 import tkinter as tk
+import json
+
 
 
 def calcularDimensoes(textBox, screenHeight, screenWidth):
@@ -13,14 +15,18 @@ def calcularDimensoes(textBox, screenHeight, screenWidth):
 
 
 
-def salvarGrafico(fig,nome):
-    
+def salvarGrafico(fig,nome,dados):
+
         path = f"SavedGraphs/{nome}.png"
+        pathjson = f"SavedGraphs/{nome}.json"
         fig.savefig(path)
+        with open(pathjson, "w") as f:
+            json.dump(dados, f, indent=4)  # `indent=4` para formatação bonita
+
         print(f"Gráfico salvo como {path}")
 
 
-def mostrarCaixaDeTexto(fig,root):
+def mostrarCaixaDeTexto(fig,root,dados):
     dialog = tk.Toplevel(root)
     dialog.title("Salvar Gráfico")
     dialog.geometry("400x300")
@@ -32,15 +38,15 @@ def mostrarCaixaDeTexto(fig,root):
     entry = tk.Entry(dialog, font=("Arial", 12), fg="black")  # Cor do texto aqui
     entry.pack(pady=10)
 
-    def salvar():
+    def salvar(dados):
         nomeGrafico = entry.get().strip()
         
         print(f"Gráfico será salvo com o nome: {nomeGrafico}")
-        salvarGrafico(fig, nomeGrafico)  
+        salvarGrafico(fig, nomeGrafico,dados)  
         dialog.destroy()  
         
 
-    save_button = tk.Button(dialog, text="Salvar", command=salvar)
+    save_button = tk.Button(dialog, text="Salvar", command=lambda:salvar(dados))
     save_button.pack(pady=10)
 
     cancel_button = tk.Button(dialog, text="Cancelar", command=dialog.destroy)
@@ -66,3 +72,6 @@ def is_dark_mode():
     
     else:
         return True  # Assume escuro para Linux
+    
+
+
