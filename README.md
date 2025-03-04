@@ -8,6 +8,7 @@ Expense Manager é uma aplicação desktop desenvolvida em Python com Tkinter e 
 - Visualização gráfica das despesas em forma de gráfico de pizza.
 - Interface responsiva e adaptada ao modo escuro.
 - Entrada de dados via campos de texto interativos.
+-Armazenamento de gráficos em disco
 
 ## Tecnologias Utilizadas
 
@@ -41,7 +42,6 @@ Expense Manager é uma aplicação desktop desenvolvida em Python com Tkinter e 
 
 ## Melhorias Futuras
 
-- Implementar a persistência de dados (guardar as despesas ao fechar a aplicação).
 - Adicionar opção para remover despesas.
 - Melhorar a interface para ser mais intuitiva.
 
