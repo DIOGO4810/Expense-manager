@@ -2,10 +2,11 @@ import platform
 import ctypes
 import tkinter as tk
 import json
-from tkinter import PhotoImage
 from PIL import Image, ImageTk
-
 import os
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 
 
@@ -18,31 +19,37 @@ def calcularDimensoes(textBox, screenHeight, screenWidth):
     return [xCenter, yCenter]
 
 
-def carregar_imagens_da_pasta(pasta, root):
 
-    # Limpar o grafSystem antes de adicionar novas imagens
-    for widget in root.winfo_children():
-        widget.destroy()  # Remove todos os widgets antigos do grafSystem
+def exibirSalvado(imagePath, root,widgets):
+    # Remover a extensão .png do imagePath
+    baseName = os.path.splitext(imagePath)[0]  
+
+
+    with open(f"{baseName}.json", "r", encoding="utf-8") as file:
+        data = json.load(file)  
+
+    fig, ax = plt.subplots()  
+    fig.patch.set_facecolor('#282828')
+    font_properties = {'color': 'white', 'fontsize': 12}  
+
+    ax.pie(x=data["sizes"], labels=data["labels"], colors=data["colors"],
+       autopct='%1.1f%%', textprops=font_properties, labeldistance=1.2)
+
+    ax.axis('equal')  
+
+    
+    canvas = widgets.getCanvas()
+
+    canvas.get_tk_widget().destroy()
+    canvas = FigureCanvasTkAgg(fig, master=root) 
+    canvas.draw()
+    canvas.get_tk_widget().pack()  
+    widgets.setCanvas(canvas)
+    widgets.atualizarInput(data) 
     
 
-    # Listar todos os arquivos .png na pasta
-    for arquivo in os.listdir(pasta):
-        if arquivo.lower().endswith('.png'):
-            caminho_imagem = os.path.join(pasta, arquivo)
-            exibir_imagem(caminho_imagem, root)
 
-
-def salvarGrafico(fig,nome,dados,grafSystem):
-
-        path = f"SavedGraphs/{nome}.png"
-        pathjson = f"SavedGraphs/{nome}.json"
-        fig.savefig(path)
-        with open(pathjson, "w") as f:
-            json.dump(dados, f, indent=4)  # `indent=4` para formatação bonita
-
-        carregar_imagens_da_pasta("SavedGraphs",grafSystem)
-
-def exibir_imagem(caminho_imagem,grafSystem):
+def exibir_imagem(caminho_imagem,grafSystem,mainRoot,widgets):
     imagem = Image.open(caminho_imagem)
     
     imagem = imagem.resize((200, 200), Image.Resampling.LANCZOS)
@@ -54,8 +61,34 @@ def exibir_imagem(caminho_imagem,grafSystem):
     label_imagem.image = imagem_tk  
     label_imagem.pack(pady=10)
 
+    label_imagem.bind("<Double-Button-1>",lambda event: exibirSalvado(caminho_imagem,mainRoot,widgets))
 
-def mostrarCaixaDeTexto(fig,root,dados,grafSystem):
+    
+
+def carregar_imagens_da_pasta(pasta, root,mainRoot,widgets):
+
+    # Limpar o grafSystem antes de adicionar novas imagens
+    for widget in root.winfo_children():
+        widget.destroy()  # Remove todos os widgets antigos do grafSystem
+    
+    # Listar todos os arquivos .png na pasta
+    for arquivo in os.listdir(pasta):
+        if arquivo.lower().endswith('.png'):
+            caminho_imagem = os.path.join(pasta, arquivo)
+            exibir_imagem(caminho_imagem, root,mainRoot,widgets)
+
+
+def salvarGrafico(fig,nome,dados,widgets,root):
+
+        path = f"SavedGraphs/{nome}.png"
+        pathjson = f"SavedGraphs/{nome}.json"
+        fig.savefig(path)
+        with open(pathjson, "w") as f:
+            json.dump(dados, f, indent=4)  # `indent=4` para formatação bonita
+
+        carregar_imagens_da_pasta("SavedGraphs",widgets.grafSystem,root,widgets)
+
+def mostrarCaixaDeTexto(fig,root,dados,widgets):
     dialog = tk.Toplevel(root)
     dialog.title("Salvar Gráfico")
     dialog.geometry("400x300")
@@ -67,15 +100,15 @@ def mostrarCaixaDeTexto(fig,root,dados,grafSystem):
     entry = tk.Entry(dialog, font=("Arial", 12), fg="black")  # Cor do texto aqui
     entry.pack(pady=10)
 
-    def salvar(dados,grafSystem):
+    def salvar(dados,widgets,root):
         nomeGrafico = entry.get().strip()
         
         print(f"Gráfico será salvo com o nome: {nomeGrafico}")
-        salvarGrafico(fig, nomeGrafico,dados,grafSystem)  
+        salvarGrafico(fig, nomeGrafico,dados,widgets,root)  
         dialog.destroy()  
         
 
-    save_button = tk.Button(dialog, text="Salvar", command=lambda:salvar(dados,grafSystem))
+    save_button = tk.Button(dialog, text="Salvar", command=lambda:salvar(dados,widgets,root))
     save_button.pack(pady=10)
 
     cancel_button = tk.Button(dialog, text="Cancelar", command=dialog.destroy)
@@ -102,5 +135,6 @@ def is_dark_mode():
     else:
         return True  # Assume escuro para Linux
     
+
 
 

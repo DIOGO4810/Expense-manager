@@ -1,123 +1,144 @@
 import tkinter as tk
-from pieChart import exibirGrafico, atualizarGraph, criarMensal,setScreen,getPercentage,setLegenda,getLabel,getSize,salvarDados
+from pieChart import exibirGrafico, atualizarGraph, criarMensal, setScreen, getPercentage, setLegenda, getLabel, getSize, salvarDados,setLegendaSalvadas
 from tela import carregar_imagens_da_pasta
 
-flag = False
-i = 0
-numDespesas = 0
-
-def submeterMensal(event,text_widget, canvas, ax,mensalValues,grafSystem):
-    global flag  # Para modificar a variável global
-    texto = text_widget.get("1.0", tk.END).strip()
-
-    text_widget.delete("1.0", tk.END)
-    criarMensal(canvas, ax, texto)
-    percentagem = getPercentage(texto)
-    labelPoupanca = getLabel(0)
-    mensalValues.set(f"{labelPoupanca}  {texto}€  {percentagem}%")
-
-    setLegenda(legendas,0,"mensal",None,mensalValues) 
-
-    
-    if not flag:  # Apenas cria os widgets na primeira submissão
-        flag = True
-        label1.pack(pady=10)
-        numberBox.pack(pady=10)
-        label2.pack(pady=10)
-        textDespesaBox.pack(pady=10)
-        submeterButton.pack(pady=10)
-        botaoSalvar = tk.Button(root, text="Salvar Gráfico", command=lambda:salvarDados(fig,root,grafSystem))
-        botaoSalvar.pack(pady=10)
-        textBox.pack_forget()
-        label.pack_forget()
+class Widgets:
+    def __init__(self, root):
+        # Definição dos widgets
+        self.root = root
+        self.label = tk.Label(root, text="Exiba o seu orçamento mensal liquido", font=("Arial", 14), fg="white", bg="#282828")
+        self.textBox = tk.Text(root, height=1, width=30, bg="white", fg="black")
+        self.label1 = tk.Label(root, text="Exiba uma despesa", font=("Arial", 14), fg="white", bg="#282828")
+        self.numberBox = tk.Entry(root, width=30, bg="white", fg="black")
+        self.label2 = tk.Label(root, text="Exiba o nome da sua despesa", font=("Arial", 14), fg="white", bg="#282828")
+        self.textDespesaBox = tk.Entry(root, width=30, bg="white", fg="black")
+        self.submeterButton = tk.Button(root, text="Submeter Despesa", command=self.processarDespesa)
+        self.telaGraficos = tk.Canvas(root, bg="#202020", width=230)
+        self.grafSystem = tk.Frame(self.telaGraficos, bg="#202020")
+        self.legendas = tk.Frame(root, width=400, bg="#202020")
 
 
-def processarDespesa(mensalValues):
-    global i
-    global numDespesas
-    value = numberBox.get().strip()
-    nome = textDespesaBox.get().strip()
+        self.botaoSalvar = tk.Button(root, text="Salvar Gráfico", command=lambda: salvarDados(self.fig, self.root, self))
 
-    atualizarGraph(canvas, ax, value, nome,numDespesas)
-    numDespesas +=1
-    
-    numberBox.delete(0, tk.END)
-    textDespesaBox.delete(0, tk.END)
-    
-    i += 1
-    percentagem = getPercentage(value)
-    sizePoupanca = getSize(0)
-    percentagemPoupanca = getPercentage(sizePoupanca)
-    labelPoupanca = getLabel(0)
-    mensalValues.set(f"{labelPoupanca}  {sizePoupanca}€  {percentagemPoupanca}%")
+        # Variáveis de controle
+        self.canvas = None
+        self.ax = None
+        self.fig = None
+        self.mensalValues = tk.StringVar()
+        self.i = 0
+        self.numDespesas = 0
+        self.flag = False
 
-    despesaValues = tk.StringVar()
-    despesaValues.set(f"{nome}  {value}€  {percentagem}%")
+    def submeterMensal(self, event):
+        texto = self.textBox.get("1.0", tk.END).strip()
+        self.textBox.delete("1.0", tk.END)
+        criarMensal(self.canvas, self.ax, texto)
+        percentagem = getPercentage(texto)
+        labelPoupanca = getLabel(0)
+        self.mensalValues.set(f"{labelPoupanca}  {texto}€  {percentagem}%")
+        setLegenda(self.legendas, 0, "mensal", None, self.mensalValues)
 
-    setLegenda(legendas,i,"despesa",despesaValues,None)    
+        if not self.flag:  # Apenas cria os widgets na primeira submissão
+            self.flag = True
+            self.label1.pack(pady=10)
+            self.numberBox.pack(pady=10)
+            self.label2.pack(pady=10)
+            self.textDespesaBox.pack(pady=10)
+            self.submeterButton.pack(pady=10)
+            self.botaoSalvar.pack(pady=10)
+            self.textBox.pack_forget()
+            self.label.pack_forget()
+
+    def processarDespesa(self):
+        value = self.numberBox.get().strip()
+        nome = self.textDespesaBox.get().strip()
+
+        atualizarGraph(self.canvas, self.ax, value, nome, self.numDespesas)
+        self.numDespesas += 1
+
+        self.numberBox.delete(0, tk.END)
+        self.textDespesaBox.delete(0, tk.END)
+
+        self.i += 1
+        percentagem = getPercentage(value)
+        sizePoupanca = getSize(0)
+        percentagemPoupanca = getPercentage(sizePoupanca)
+        labelPoupanca = getLabel(0)
+        self.mensalValues.set(f"{labelPoupanca}  {sizePoupanca}€  {percentagemPoupanca}%")
+
+        despesaValues = tk.StringVar()
+        despesaValues.set(f"{nome}  {value}€  {percentagem}%")
+
+        setLegenda(self.legendas, self.i, "despesa", despesaValues, None)
+
+    def atualizarInput(self,data):
+        self.textBox.pack_forget()
+        self.label.pack_forget()
+
+        self.label1.pack_forget()
+        self.numberBox.pack_forget()
+        self.label2.pack_forget()
+        self.textDespesaBox.pack_forget()
+        self.submeterButton.pack_forget()
+        self.botaoSalvar.pack_forget()
+
+        self.label1.pack(pady=10)
+        self.numberBox.pack(pady=10)
+        self.label2.pack(pady=10)
+        self.textDespesaBox.pack(pady=10)
+        self.submeterButton.pack(pady=10)
+        self.botaoSalvar.pack(pady=10)
+        setLegendaSalvadas(data,self.legendas)
+
+    def setCanvas(self, new_canvas):
+        self.canvas = new_canvas
+
+    def getCanvas(self):
+        return self.canvas
+
+    def exibirGrafico(self):
+        self.canvas, self.ax, self.fig = exibirGrafico(self.root)
+        self.setCanvas(self.canvas)
+
+    def inicializarWidgets(self):
+        self.label.pack(pady=10)
+        self.textBox.pack(pady=10)
+        self.textBox.bind("<Return>", self.submeterMensal)
+
+def main():
+    global root
+
+    # Zona do Set da tela e gráfico Inicial
+    root = tk.Tk()
+
+    setScreen(root)
 
 
+    widgets = Widgets(root)
 
 
-# Zona do Set da tela e gráfico Inicial
+    widgets.legendas.pack(side="right", fill="y")
 
-root = tk.Tk()
+    widgets.telaGraficos.pack(side="left", fill="y")
 
-screenHeight,screenWidth = setScreen(root)
+    scrollbar = tk.Scrollbar(root, orient="vertical", command=widgets.telaGraficos.yview)
+    scrollbar.pack(side="left", fill="y")
 
-legendas = tk.Frame(root,width=400,bg="#202020")
-legendas.pack(side="right", fill="y")
+    widgets.telaGraficos.config(yscrollcommand=scrollbar.set)
 
-# Criar o Canvas dentro do Frame principal
-canvas = tk.Canvas(root, bg="#202020",width=230)
-canvas.pack(side="left",fill="y")
+    widgets.telaGraficos.create_window(0, 0, window=widgets.grafSystem, anchor="nw")
 
-# Adicionar a barra de rolagem no Canvas
-scrollbar = tk.Scrollbar(root, orient="vertical", command=canvas.yview)
-scrollbar.pack(side="left", fill="y")
-
-# Configurar o Canvas para trabalhar com a barra de rolagem
-canvas.config(yscrollcommand=scrollbar.set)
-
-# Criar o Frame grafSystem dentro do Canvas
-grafSystem = tk.Frame(canvas, bg="#202020")
-canvas.create_window(0, 0, window=grafSystem, anchor="nw")
-
-# Carregar as imagens da pasta SavedGraphs e exibir no grafSystem
-carregar_imagens_da_pasta("SavedGraphs", grafSystem)
-
-# Atualizar a área rolável e configurar a rolagem corretamente
-grafSystem.update_idletasks()  # Atualiza o layout do grafSystem
-canvas.config(scrollregion=canvas.bbox("all"))  # Atualiza o tamanho da área rolável
+    widgets.grafSystem.update_idletasks()
+    widgets.telaGraficos.config(scrollregion=widgets.telaGraficos.bbox("all"))
 
 
-canvas,ax,fig = exibirGrafico(root)
+    widgets.exibirGrafico()
 
+    carregar_imagens_da_pasta("SavedGraphs", widgets.grafSystem, root, widgets)
 
-# Zona do rendimento mensal
+    widgets.inicializarWidgets()
 
-label = tk.Label(root, text="Exiba o seu orçamento mensal liquido", font=("Arial", 14), fg="white", bg="#282828")
-label.pack(pady=10)
-textBox = tk.Text(root, height=1, width=30, bg="white", fg="black")
-textBox.pack(pady=10)
-mensalValues = tk.StringVar()
+    root.mainloop()
 
-textBox.bind("<Return>", lambda event: submeterMensal(event, textBox, canvas, ax,mensalValues,grafSystem))
-
-
-# Zona das Despesas
-
-label1 = tk.Label(root, text="Exiba a sua primeira despesa", font=("Arial", 14), fg="white", bg="#282828")
-numberBox = tk.Entry(root, width=30, bg="white", fg="black")
-
-label2 = tk.Label(root, text="Exiba o nome da sua primeira despesa", font=("Arial", 14), fg="white", bg="#282828")
-textDespesaBox = tk.Entry(root, width=30, bg="white", fg="black")
-
-
-submeterButton = tk.Button(root,text="Submeter Despesa", command=lambda:processarDespesa(mensalValues))
-
-
-  
-
-
-root.mainloop()
+if __name__ == "__main__":
+    main()

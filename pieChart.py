@@ -3,19 +3,20 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import random
 from tela import is_dark_mode,mostrarCaixaDeTexto
 import tkinter as tk
+import json
 
 labels = ['Poupança']
 sizes = [200]
 colors = ['#99ff99']
 
 
-def salvarDados(fig,root,grafSystem):
+def salvarDados(fig,root,widgets):
     dados = {
         "labels": labels,
         "sizes": sizes,
         "colors": colors
     }
-    mostrarCaixaDeTexto(fig,root,dados,grafSystem)
+    mostrarCaixaDeTexto(fig,root,dados,widgets)
 
 
 
@@ -33,7 +34,7 @@ def setScreen (root):
     root.configure(bg=bgColor)
     root.option_add("*foreground", fgColor)
 
-    return screenHeight,screenWidth
+ 
 
 def exibirGrafico(root):
     fig, ax = plt.subplots()  
@@ -108,7 +109,7 @@ def setLegenda (legendas,i,tipo,despesaValues,mensalValues):
 
         corFrame = tk.Frame(entryFrame, width=60, height=20, bg=colors[i])  
         corFrame.pack(side="left", padx=5)
-    elif ("mensal") :
+    elif tipo == "mensal" :
         entryFrame = tk.Frame(legendas, bg="#202020")  
         entryFrame.pack(pady=5)  
 
@@ -121,6 +122,33 @@ def setLegenda (legendas,i,tipo,despesaValues,mensalValues):
     else:
         print("SetLegenda com tipo fora do comum")
 
+def setLegendaSalvadas(data,legendas):
+    for widget in legendas.winfo_children():
+        widget.destroy()
+
+    numLegendas = len(data["labels"])
+    i = 0
+    for i in range(numLegendas):
+        despesaValues = tk.StringVar()
+
+        total = sum(data['sizes'])
+        percentagem = round((float(data['sizes'][i]) / total) * 100, 1)
+
+        despesaValues.set(f"{data['labels'][i]}  {data['sizes'][i]}€  {percentagem}%")
+
+        entryFrame = tk.Frame(legendas, bg="#202020")  
+        entryFrame.pack(pady=10)  
+
+        labelSide = tk.Label(entryFrame, textvariable=despesaValues, font=("Arial", 14), fg="white", bg="#202020")
+        labelSide.pack(side="left", padx=(50, 0))  
+
+        corFrame = tk.Frame(entryFrame, width=60, height=20, bg=data["colors"][i])  
+        corFrame.pack(side="left", padx=5)
+
+
+
+
+
 
 def getLabel (i):
     return labels[i]
@@ -128,3 +156,10 @@ def getLabel (i):
 
 def getSize (i):
     return sizes[i]
+
+
+
+
+
+
+
