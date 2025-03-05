@@ -8,7 +8,7 @@ import json
 labels = ['Poupança']
 sizes = [200]
 colors = ['#99ff99']
-
+defice = 0
 
 def salvarDados(fig,root,widgets):
     dados = {
@@ -63,11 +63,20 @@ def criarMensal(canvas, ax, input):
     canvas.draw()
 
 def atualizarGraph(canvas, ax, size,nome,numDespesas):
-
+    global defice
 
     novo_valor = int(size)  
+    possibleLeftover = sizes[0]  
     sizes[0] = sizes[0] - novo_valor
-
+    if sizes[0] < 0 :
+        labels[0] = nome
+        sizes[0] = possibleLeftover
+        defice +=abs(sizes[0] - novo_valor)
+        ax.clear()  
+        ax.pie(sizes, colors=colors, labels=labels, autopct='%1.1f%%', labeldistance=1.2,textprops = {'color': 'white', 'fontsize': 12})
+        ax.axis('equal')  
+        canvas.draw() 
+        return 1
 
     sizes.append(novo_valor)
     labels.append(nome)
@@ -84,6 +93,7 @@ def atualizarGraph(canvas, ax, size,nome,numDespesas):
     canvas.draw()  
     print(labels)
     print(sizes)
+    print(defice)
     
 
 
@@ -95,6 +105,12 @@ def getPercentage (size):
     return round((float(size)/total) * 100,1)
 
 
+def atualizaLegendaPoupanca (legendas,nome,value,percentagem):
+    primeiro_frame = legendas.winfo_children()[0]  # Acessa o primeiro Frame
+    labelSide = primeiro_frame.winfo_children()[0]  # Acessa o primeiro widget (labelSide) dentro desse Frame
+    despesaValues = tk.StringVar()
+    despesaValues.set(f"{nome}  {value}€  {percentagem}%")
+    labelSide.config(textvariable=despesaValues)  # Atualiza o texto no Label
 
 
 def setLegenda (legendas,i,tipo,despesaValues,mensalValues):
@@ -146,6 +162,15 @@ def setLegendaSalvadas(data,legendas):
         corFrame.pack(side="left", padx=5)
 
 
+
+def setChartValues(data):
+    global labels, sizes, colors  
+    labels.clear()
+    sizes.clear()
+    colors.clear()
+    labels = data["labels"]
+    sizes = data["sizes"]
+    colors = data["colors"]
 
 
 

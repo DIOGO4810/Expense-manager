@@ -1,5 +1,6 @@
 import tkinter as tk
-from pieChart import exibirGrafico, atualizarGraph, criarMensal, setScreen, getPercentage, setLegenda, getLabel, getSize, salvarDados,setLegendaSalvadas
+from pieChart import (exibirGrafico, atualizarGraph, criarMensal, setScreen, getPercentage, setLegenda, getLabel, 
+                      getSize, salvarDados,setLegendaSalvadas,atualizaLegendaPoupanca,setChartValues)
 from tela import carregar_imagens_da_pasta
 
 class Widgets:
@@ -53,15 +54,21 @@ class Widgets:
         value = self.numberBox.get().strip()
         nome = self.textDespesaBox.get().strip()
 
-        atualizarGraph(self.canvas, self.ax, value, nome, self.numDespesas)
+        deficeFlag = atualizarGraph(self.canvas, self.ax, value, nome, self.numDespesas)
+        
         self.numDespesas += 1
 
         self.numberBox.delete(0, tk.END)
         self.textDespesaBox.delete(0, tk.END)
-
-        self.i += 1
-        percentagem = getPercentage(value)
         sizePoupanca = getSize(0)
+
+        if(deficeFlag == 1):
+            percentagem = getPercentage(sizePoupanca)
+            atualizaLegendaPoupanca(self.legendas,nome,sizePoupanca,percentagem)
+            return
+        
+        percentagem = getPercentage(value)
+        self.i += 1
         percentagemPoupanca = getPercentage(sizePoupanca)
         labelPoupanca = getLabel(0)
         self.mensalValues.set(f"{labelPoupanca}  {sizePoupanca}€  {percentagemPoupanca}%")
@@ -88,10 +95,14 @@ class Widgets:
         self.textDespesaBox.pack(pady=10)
         self.submeterButton.pack(pady=10)
         self.botaoSalvar.pack(pady=10)
+        setChartValues(data)
         setLegendaSalvadas(data,self.legendas)
 
-    def setCanvas(self, new_canvas):
-        self.canvas = new_canvas
+    def setCanvas(self, newCanvas):
+        self.canvas = newCanvas
+    
+    def setAx(self,newAx):
+        self.ax = newAx
 
     def getCanvas(self):
         return self.canvas

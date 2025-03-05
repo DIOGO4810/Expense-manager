@@ -45,6 +45,7 @@ def exibirSalvado(imagePath, root,widgets):
     canvas.draw()
     canvas.get_tk_widget().pack()  
     widgets.setCanvas(canvas)
+    widgets.setAx(ax)
     widgets.atualizarInput(data) 
     
 
