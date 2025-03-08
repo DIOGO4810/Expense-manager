@@ -64,8 +64,10 @@ def criarMensal(canvas, ax, input):
 
 def atualizarGraph(canvas, ax, size,nome,numDespesas):
     global defice
-
     novo_valor = int(size)  
+    if defice > 0 :
+        defice += novo_valor
+        return 2
     possibleLeftover = sizes[0]  
     sizes[0] = sizes[0] - novo_valor
     if sizes[0] < 0 :
@@ -80,7 +82,7 @@ def atualizarGraph(canvas, ax, size,nome,numDespesas):
 
     sizes.append(novo_valor)
     labels.append(nome)
-    colors.append(f'#{random.randint(0, 255):02x}{random.randint(0, 255):02x}{random.randint(0, 255):02x}')
+    colors.append(f'#{random.randint(30, 255):02x}{random.randint(30, 255):02x}{random.randint(30, 255):02x}')
 
     ax.clear()  
     if(numDespesas < 3):    
@@ -138,7 +140,7 @@ def setLegenda (legendas,i,tipo,despesaValues,mensalValues):
     else:
         print("SetLegenda com tipo fora do comum")
 
-def setLegendaSalvadas(data,legendas):
+def setLegendaSalvadas(data,legendas,widgets):
     for widget in legendas.winfo_children():
         widget.destroy()
 
@@ -160,6 +162,23 @@ def setLegendaSalvadas(data,legendas):
 
         corFrame = tk.Frame(entryFrame, width=60, height=20, bg=data["colors"][i])  
         corFrame.pack(side="left", padx=5)
+    widgets.setcolorIndice(i)
+    
+    
+    
+
+def setLegendaDefice(legendas,nome,value):
+    deficeValues = tk.StringVar()
+    deficeValues.set(f"{nome}  {value}")
+
+    entryFrame = tk.Frame(legendas, bg="#202020")  
+    entryFrame.pack(pady=5)  
+
+    labelSide = tk.Label(entryFrame, textvariable=deficeValues, font=("Arial", 14), fg="white", bg="#202020")
+    labelSide.pack(side="left", padx=(50,0)) 
+
+    corFrame = tk.Frame(entryFrame, width=60, height=20, bg="#ff0000")  
+    corFrame.pack(side="left", padx=5)  
 
 
 

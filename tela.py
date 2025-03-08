@@ -46,6 +46,7 @@ def exibirSalvado(imagePath, root,widgets):
     canvas.get_tk_widget().pack()  
     widgets.setCanvas(canvas)
     widgets.setAx(ax)
+    widgets.setFig(fig)
     widgets.atualizarInput(data) 
     
 
@@ -60,7 +61,7 @@ def exibir_imagem(caminho_imagem,grafSystem,mainRoot,widgets):
     # Exibir a imagem em um label
     label_imagem = tk.Label(grafSystem, image=imagem_tk)
     label_imagem.image = imagem_tk  
-    label_imagem.pack(pady=10)
+    label_imagem.pack(pady=10,padx=12)
 
     label_imagem.bind("<Double-Button-1>",lambda event: exibirSalvado(caminho_imagem,mainRoot,widgets))
 
