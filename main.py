@@ -4,7 +4,7 @@ from pieChart import (
     getLabel, getSize, salvarDados, setLegendaSalvadas, atualizaLegendaPoupanca,
     setChartValues, setLegendaDefice
 )
-from tela import carregar_imagens_da_pasta
+from tela import carregar_imagens_da_pasta,on_mouse_wheel,update_scroll_region
 
 
 class Widgets:
@@ -25,8 +25,10 @@ class Widgets:
         self.label2 = tk.Label(self.root, text="Exiba o nome da sua despesa", font=("Arial", 14), fg="white", bg="#282828")
         self.textDespesaBox = tk.Entry(self.root, width=30, bg="white", fg="black")
         self.submeterButton = tk.Button(self.root, text="Submeter Despesa", command=self.processarDespesa)
+        self.submeterButton.bind("<Return>",lambda event: self.processarDespesa())
         
         self.botaoSalvar = tk.Button(self.root, text="Salvar Gráfico", command=lambda: salvarDados(self.fig, self.root, self))
+        self.botaoSalvar.bind("<Return>", lambda event: salvarDados(self.fig, self.root, self))
         self.legendas = tk.Frame(self.root, width=400, bg="#202020")
         
     def configurarScroll(self):
@@ -44,9 +46,11 @@ class Widgets:
         self.grafSystem = tk.Frame(self.telaGraficos, bg="#202020")
         self.telaGraficos.create_window((0, 0), window=self.grafSystem, anchor="nw")
         
-        self.grafSystem.bind("<Configure>", self.update_scroll_region)
-        self.telaGraficos.bind_all("<MouseWheel>", self._on_mouse_wheel)
-    
+        self.grafSystem.bind("<Configure>", lambda event: update_scroll_region(self, event))
+        self.telaGraficos.bind_all("<MouseWheel>", lambda event: on_mouse_wheel(self, event))  
+        self.telaGraficos.bind_all("<Button-4>", lambda event: on_mouse_wheel(self, event))   
+        self.telaGraficos.bind_all("<Button-5>", lambda event: on_mouse_wheel(self, event))        
+
     def inicializarVariáveis(self):
         """Inicializa as variáveis de controle."""
         self.canvas = None
@@ -56,13 +60,12 @@ class Widgets:
         self.colorIndice = 0
         self.numDespesas = 0
         self.flag = False
-
-    def update_scroll_region(self, event=None):
-        self.telaGraficos.update_idletasks()
-        self.telaGraficos.config(scrollregion=self.telaGraficos.bbox("all"))
     
-    def _on_mouse_wheel(self, event):
-        self.telaGraficos.yview_scroll(-1 * (event.delta // 120), "units")
+
+    def inicializarWidgets(self):   
+        self.label.pack(pady=10)
+        self.textBox.pack(pady=10)
+
     
     def submeterMensal(self, event):
         texto = self.textBox.get("1.0", tk.END).strip()
@@ -117,22 +120,23 @@ class Widgets:
         self.colorIndice += 1
         
         if deficeFlag == 1:
-            atualizaLegendaPoupanca(self.legendas, nome, sizePoupanca, getPercentage(sizePoupanca))
+            atualizaLegendaPoupanca(self.legendas, nome, sizePoupanca, getPercentage(sizePoupanca)) #Tratar do issue do primeiro defice
             return
         elif deficeFlag == 2:
             setLegendaDefice(self.legendas, nome, value)
             return
         
+        percentagemPoupanca = getPercentage(sizePoupanca)
+        labelPoupanca = getLabel(0)
+        print("Antes de atualizar:", self.mensalValues.get())  # DEBUG
+        self.mensalValues.set(f"{labelPoupanca}  {sizePoupanca}€  {percentagemPoupanca}%")
+        print("Depois de atualizar:", self.mensalValues.get())  # DEBUG
         despesaValues = tk.StringVar()
         despesaValues.set(f"{nome}  {value}€  {getPercentage(value)}%")
         setLegenda(self.legendas, self.colorIndice, "despesa", despesaValues, None)
     
     def exibirGrafico(self):
         self.canvas, self.ax, self.fig = exibirGrafico(self.root)
-
-    def inicializarWidgets(self):   
-        self.label.pack(pady=10)
-        self.textBox.pack(pady=10)
 
 
     def setCanvas(self, newCanvas):
@@ -144,11 +148,23 @@ class Widgets:
     def setFig(self,newFig):
         self.fig = newFig
 
+    def setcolorIndice(self,newcolorIndice):
+        self.colorIndice =newcolorIndice
+
+    def setMensalValues(self,mensalvalues):
+        self.mensalValues = mensalvalues
+
+    def setLegendas(self,newLegendas):
+        self.legendas = newLegendas
+    
+    def setNumDespesas(self,newNum):
+        self.numDespesas = newNum
+
     def getCanvas(self):
         return self.canvas
     
-    def setcolorIndice(self,newcolorIndice):
-        self.colorIndice =newcolorIndice
+        
+
 
 
 def main():

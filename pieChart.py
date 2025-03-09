@@ -82,7 +82,7 @@ def atualizarGraph(canvas, ax, size,nome,numDespesas):
 
     sizes.append(novo_valor)
     labels.append(nome)
-    colors.append(f'#{random.randint(30, 255):02x}{random.randint(30, 255):02x}{random.randint(30, 255):02x}')
+    colors.append(f'#{random.randint(30, 255):02x}{random.randint(30, 230):02x}{random.randint(30, 255):02x}')
 
     ax.clear()  
     if(numDespesas < 3):    
@@ -162,7 +162,13 @@ def setLegendaSalvadas(data,legendas,widgets):
 
         corFrame = tk.Frame(entryFrame, width=60, height=20, bg=data["colors"][i])  
         corFrame.pack(side="left", padx=5)
+        if i == 0:
+            widgets.setMensalValues(despesaValues)
+
     widgets.setcolorIndice(i)
+
+    
+
     
     
     

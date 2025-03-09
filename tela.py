@@ -32,8 +32,14 @@ def exibirSalvado(imagePath, root,widgets):
     fig.patch.set_facecolor('#282828')
     font_properties = {'color': 'white', 'fontsize': 12}  
 
-    ax.pie(x=data["sizes"], labels=data["labels"], colors=data["colors"],
-       autopct='%1.1f%%', textprops=font_properties, labeldistance=1.2)
+    widgets.setNumDespesas(len(data["labels"]) - 1)
+    
+    if widgets.numDespesas < 3:
+        ax.pie(x=data["sizes"], labels=data["labels"], colors=data["colors"],
+            autopct='%1.1f%%', textprops=font_properties, labeldistance=1.2)
+    else :
+        ax.pie(x=data["sizes"], labels=None, colors=data["colors"],
+            autopct='%1.1f%%', textprops=font_properties, labeldistance=1.2)
 
     ax.axis('equal')  
 
@@ -111,9 +117,13 @@ def mostrarCaixaDeTexto(fig,root,dados,widgets):
         
 
     save_button = tk.Button(dialog, text="Salvar", command=lambda:salvar(dados,widgets,root))
+    save_button.bind("<Return>", lambda event: salvar(dados,widgets,root))
+
     save_button.pack(pady=10)
 
     cancel_button = tk.Button(dialog, text="Cancelar", command=dialog.destroy)
+    cancel_button.bind("<Return>", lambda event:dialog.destroy())
+
     cancel_button.pack(pady=10)
 
 
@@ -137,6 +147,21 @@ def is_dark_mode():
     else:
         return True  # Assume escuro para Linux
     
+def update_scroll_region(self, event=None):
+    """Atualiza a região de rolagem para o canvas."""
+    self.telaGraficos.update_idletasks()
+    self.telaGraficos.config(scrollregion=self.telaGraficos.bbox("all"))
+    
+def on_mouse_wheel(self, event):
+    """Processa a rolagem do mouse (Windows/Linux)."""
+    # Para Windows e plataformas com event.delta
+    if event.delta:
+        self.telaGraficos.yview_scroll(-1 * (event.delta // 120), "units")
+    # Para sistemas Unix/Linux com Button-4 e Button-5
+    elif event.num == 4:  # Rolagem para cima
+        self.telaGraficos.yview_scroll(-1, "units")
+    elif event.num == 5:  # Rolagem para baixo
+        self.telaGraficos.yview_scroll(1, "units")
 
 
 
