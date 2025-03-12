@@ -9,12 +9,16 @@ labels = ['Poupança']
 sizes = [200]
 colors = ['#99ff99']
 defice = 0
+deficeSizes = []
 
 def salvarDados(fig,root,widgets):
     dados = {
         "labels": labels,
         "sizes": sizes,
-        "colors": colors
+        "colors": colors,
+        "defice": defice,
+        "deficeSizes": deficeSizes
+
     }
     mostrarCaixaDeTexto(fig,root,dados,widgets)
 
@@ -62,40 +66,57 @@ def criarMensal(canvas, ax, input):
 
     canvas.draw()
 
-def atualizarGraph(canvas, ax, size,nome,numDespesas):
+def atualizarGraph(widgets,size,nome):
     global defice
-    novo_valor = int(size)  
+    novo_valor = int(size)
     if defice > 0 :
         defice += novo_valor
+        widgets.deficeVar.set(defice)
+        print(f"aqui{deficeSizes}")
+
+        deficeSizes.append(novo_valor)
+        labels.append(nome)
+        colors.append("#ff0000")
+        print(deficeSizes)
+
         return 2
+    
     possibleLeftover = sizes[0]  
     sizes[0] = sizes[0] - novo_valor
-    if sizes[0] < 0 :
+
+    if sizes[0] < 0 and labels[0] == "Poupança":
         labels[0] = nome
         sizes[0] = possibleLeftover
         defice +=abs(sizes[0] - novo_valor)
-        ax.clear()  
-        ax.pie(sizes, colors=colors, labels=labels, autopct='%1.1f%%', labeldistance=1.2,textprops = {'color': 'white', 'fontsize': 12})
-        ax.axis('equal')  
-        canvas.draw() 
+        widgets.ax.clear()  
+        if(widgets.numDespesas < 3):    
+            widgets.ax.pie(sizes, colors=colors, labels=labels, autopct='%1.1f%%', labeldistance=1.2,textprops = {'color': 'white', 'fontsize': 12})
+        else:
+            widgets.ax.pie(sizes, colors=colors, labels=None, autopct='%1.1f%%', labeldistance=1.2,textprops = {'color': 'white', 'fontsize': 12})
+
+        widgets.ax.axis('equal')  
+        widgets.canvas.draw() 
+        widgets.setDeficeVar(defice)
+        deficeSizes.append(defice)
+        labels.append(nome)
+        colors.append("#ff0000")
         return 1
 
     sizes.append(novo_valor)
     labels.append(nome)
     colors.append(f'#{random.randint(30, 255):02x}{random.randint(30, 230):02x}{random.randint(30, 255):02x}')
 
-    ax.clear()  
-    if(numDespesas < 3):    
-        ax.pie(sizes, colors=colors, labels=labels, autopct='%1.1f%%', labeldistance=1.2,textprops = {'color': 'white', 'fontsize': 12})
+    widgets.ax.clear()  
+    if(widgets.numDespesas < 3):    
+        widgets.ax.pie(sizes, colors=colors, labels=labels, autopct='%1.1f%%', labeldistance=1.2,textprops = {'color': 'white', 'fontsize': 12})
     else:
-        ax.pie(sizes, colors=colors, labels=None, autopct='%1.1f%%', labeldistance=1.2,textprops = {'color': 'white', 'fontsize': 12})
+        widgets.ax.pie(sizes, colors=colors, labels=None, autopct='%1.1f%%', labeldistance=1.2,textprops = {'color': 'white', 'fontsize': 12})
 
-    ax.axis('equal')  
+    widgets.ax.axis('equal')  
 
-    canvas.draw()  
+    widgets.canvas.draw()  
     print(labels)
     print(sizes)
-    print(defice)
     
 
 
@@ -107,12 +128,19 @@ def getPercentage (size):
     return round((float(size)/total) * 100,1)
 
 
-def atualizaLegendaPoupanca (legendas,nome,value,percentagem):
+def atualizaLegendaPoupanca (legendas,nome,valorPoupanca,value):
     primeiro_frame = legendas.winfo_children()[0]  # Acessa o primeiro Frame
     labelSide = primeiro_frame.winfo_children()[0]  # Acessa o primeiro widget (labelSide) dentro desse Frame
+
     despesaValues = tk.StringVar()
-    despesaValues.set(f"{nome}  {value}€  {percentagem}%")
+    percentagemPoupança = getPercentage(valorPoupanca)
+    despesaValues.set(f"{nome}  {valorPoupanca}€  {percentagemPoupança}%")
     labelSide.config(textvariable=despesaValues)  # Atualiza o texto no Label
+
+    valueInt = int(value)
+    deficeValues = tk.StringVar()
+    deficeValues.set(f"{nome}  {valueInt - valorPoupanca}€ ")
+    setLegenda(legendas,-1,"despesa",deficeValues,None)
 
 
 def setLegenda (legendas,i,tipo,despesaValues,mensalValues):
@@ -125,8 +153,13 @@ def setLegenda (legendas,i,tipo,despesaValues,mensalValues):
         labelSide = tk.Label(entryFrame, textvariable=despesaValues, font=("Arial", 14), fg="white", bg="#202020")
         labelSide.pack(side="left", padx=(50,0))  
 
-        corFrame = tk.Frame(entryFrame, width=60, height=20, bg=colors[i])  
-        corFrame.pack(side="left", padx=5)
+        if i >= 0:
+            corFrame = tk.Frame(entryFrame, width=60, height=20, bg=colors[i])  
+            corFrame.pack(side="left", padx=5)
+        else:
+            corFrame = tk.Frame(entryFrame, width=60, height=20, bg="#ff0000")  
+            corFrame.pack(side="left", padx=5)            
+
     elif tipo == "mensal" :
         entryFrame = tk.Frame(legendas, bg="#202020")  
         entryFrame.pack(pady=5)  
@@ -144,7 +177,7 @@ def setLegendaSalvadas(data,legendas,widgets):
     for widget in legendas.winfo_children():
         widget.destroy()
 
-    numLegendas = len(data["labels"])
+    numLegendas = len(data["sizes"])
     i = 0
     for i in range(numLegendas):
         despesaValues = tk.StringVar()
@@ -164,6 +197,21 @@ def setLegendaSalvadas(data,legendas,widgets):
         corFrame.pack(side="left", padx=5)
         if i == 0:
             widgets.setMensalValues(despesaValues)
+    
+    numDefices = len(data["deficeSizes"])
+    for i in range(numDefices):
+        despesaValues = tk.StringVar()
+
+        despesaValues.set(f"{data['labels'][i+numLegendas]}  {data['deficeSizes'][i]}€")
+
+        entryFrame = tk.Frame(legendas, bg="#202020")  
+        entryFrame.pack(pady=10)  
+
+        labelSide = tk.Label(entryFrame, textvariable=despesaValues, font=("Arial", 14), fg="white", bg="#202020")
+        labelSide.pack(side="left", padx=(50, 0))  
+
+        corFrame = tk.Frame(entryFrame, width=60, height=20, bg="#ff0000")  
+        corFrame.pack(side="left", padx=5)
 
     widgets.setcolorIndice(i)
 
@@ -189,13 +237,16 @@ def setLegendaDefice(legendas,nome,value):
 
 
 def setChartValues(data):
-    global labels, sizes, colors  
+    global labels, sizes, colors,deficeSizes
     labels.clear()
     sizes.clear()
     colors.clear()
+    deficeSizes.clear()
     labels = data["labels"]
     sizes = data["sizes"]
     colors = data["colors"]
+    deficeSizes = data["deficeSizes"]
+    
 
 
 
@@ -207,6 +258,9 @@ def getLabel (i):
 def getSize (i):
     return sizes[i]
 
+def setDefice(newDefice):
+    global defice
+    defice = newDefice
 
 
 

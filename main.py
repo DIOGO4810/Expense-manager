@@ -2,7 +2,7 @@ import tkinter as tk
 from pieChart import (
     exibirGrafico, atualizarGraph, criarMensal, setScreen, getPercentage, setLegenda,
     getLabel, getSize, salvarDados, setLegendaSalvadas, atualizaLegendaPoupanca,
-    setChartValues, setLegendaDefice
+    setChartValues, setLegendaDefice,setDefice
 )
 from tela import carregar_imagens_da_pasta,on_mouse_wheel,update_scroll_region
 
@@ -60,6 +60,13 @@ class Widgets:
         self.colorIndice = 0
         self.numDespesas = 0
         self.flag = False
+        self.deficeVar = tk.StringVar()
+        self.deficeFrame = tk.Frame() 
+        self.labelDefice = tk.Label(self.deficeFrame)
+
+
+
+
     
 
     def inicializarWidgets(self):   
@@ -111,16 +118,15 @@ class Widgets:
     def processarDespesa(self):
         value = self.numberBox.get().strip()
         nome = self.textDespesaBox.get().strip()
-        deficeFlag = atualizarGraph(self.canvas, self.ax, value, nome, self.numDespesas)
+        deficeFlag = atualizarGraph(self, value, nome)
         self.numDespesas += 1
         
         self.numberBox.delete(0, tk.END)
         self.textDespesaBox.delete(0, tk.END)
         sizePoupanca = getSize(0)
         self.colorIndice += 1
-        
         if deficeFlag == 1:
-            atualizaLegendaPoupanca(self.legendas, nome, sizePoupanca, getPercentage(sizePoupanca)) #Tratar do issue do primeiro defice
+            atualizaLegendaPoupanca(self.legendas, nome, sizePoupanca,value) #Tratar do issue do primeiro defice
             return
         elif deficeFlag == 2:
             setLegendaDefice(self.legendas, nome, value)
@@ -128,9 +134,9 @@ class Widgets:
         
         percentagemPoupanca = getPercentage(sizePoupanca)
         labelPoupanca = getLabel(0)
-        print("Antes de atualizar:", self.mensalValues.get())  # DEBUG
+
         self.mensalValues.set(f"{labelPoupanca}  {sizePoupanca}€  {percentagemPoupanca}%")
-        print("Depois de atualizar:", self.mensalValues.get())  # DEBUG
+
         despesaValues = tk.StringVar()
         despesaValues.set(f"{nome}  {value}€  {getPercentage(value)}%")
         setLegenda(self.legendas, self.colorIndice, "despesa", despesaValues, None)
@@ -159,6 +165,20 @@ class Widgets:
     
     def setNumDespesas(self,newNum):
         self.numDespesas = newNum
+    
+    def setDeficeVar(self,newDefice):
+        if(newDefice == 0):
+            self.deficeFrame.pack_forget()
+            setDefice(newDefice)
+            return
+        self.deficeVar.set(newDefice)
+        setDefice(newDefice)
+        self.deficeFrame.config(bg="#ff2020", width=200)
+        self.deficeFrame.pack(side="bottom", anchor="e", pady=10, padx=5)
+        self.labelDefice.config(textvariable=self.deficeVar, font=("Arial", 14), fg="white", bg="#202020")
+        self.labelDefice.pack(padx=5, side="right", anchor="e")
+
+
 
     def getCanvas(self):
         return self.canvas

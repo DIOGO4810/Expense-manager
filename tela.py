@@ -53,7 +53,10 @@ def exibirSalvado(imagePath, root,widgets):
     widgets.setCanvas(canvas)
     widgets.setAx(ax)
     widgets.setFig(fig)
-    widgets.atualizarInput(data) 
+    widgets.setDeficeVar(data["defice"]) 
+    
+
+    widgets.atualizarInput(data)
     
 
 
