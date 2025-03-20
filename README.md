@@ -23,7 +23,10 @@ Expense Manager é uma aplicação desktop desenvolvida em Python com Tkinter e 
 1. Certifique-se de ter o Python instalado (versão 3.x).
 2. Instale as dependências necessárias:
    ```bash
+   sudo apt install python3-tk
+   sudo apt install python3-pip
    pip install matplotlib
+   pip3 install --upgrade --force-reinstall pillow
    ```
 3. Clone ou baixe este repositório.
 4. Execute o ficheiro principal:
